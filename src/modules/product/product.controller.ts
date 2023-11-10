@@ -12,6 +12,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from 'src/entities/proudct.entity';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { CreateUOMDto } from '../uom/dto/create-uom.dto';
 
 @Controller('product')
 export class ProductController {
@@ -141,11 +142,90 @@ export class ProductController {
           ],
         },
       },
+      'Update All Data': {
+        summary: 'Example of Updating All Data',
+        value: {
+          name: 'New Product Name',
+          uoms: [
+            {
+              uomId: 1,
+              uomImage: {
+                url: 'https://waer.com/image.jpg',
+              },
+              uomBarcode: {
+                barcode: 'new updated code',
+              },
+              addons: [
+                {
+                  addonId: 1,
+                  name: 'the new name of the Addon',
+                  addonItems: [
+                    {
+                      addonItemId: 1,
+                      name: 'new addon item name',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
     },
   })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productService.update(+id, updateProductDto);
+  }
+
+  @Post(':productId/uoms')
+  @ApiParam({
+    name: 'productId',
+    example: 1,
+    description: 'The ID of the product',
+  })
+  @ApiBody({
+    description: 'The UOM to add to the product',
+    type: CreateUOMDto,
+    examples:{
+      'Add UOM to Product':{
+        summary:'Add UOM to Product',
+        value:{
+          name:'UOM 1',
+          uomBarcode:{
+            barcode:'123456789'
+          },
+          uomImage:{
+            url:'https://waer.com/image.jpg'
+          },
+          addons:[
+            {
+              name:'Addon 1',
+              addonItems:[
+                {
+                  name:'Addon Item 1'
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  })
+  @ApiOperation({ summary: 'Add a UOM to a product' })
+  async addUomToProduct(
+    @Param('productId') productId: number,
+    @Body() uom: CreateUOMDto,
+  ) {
+    return this.productService.addUomToProduct(productId, uom);
+  }
+
+  @Delete(':productId/uoms/:uomId')
+  async removeUomFromProduct(
+    @Param('productId') productId: number,
+    @Param('uomId') uomId: number,
+  ) {
+    return this.productService.removeUomFromProduct(productId, uomId);
   }
 
   @Delete(':id')

@@ -11,12 +11,18 @@ export class UomService {
     @InjectRepository(UOM) private readonly uomRepository: Repository<UOM>,
   ) {}
 
-  create(createUomDto: CreateUOMDto) {
-    return 'This action adds a new uom';
+  async create(createUomDto: CreateUOMDto) {
+    const newUom = this.uomRepository.create(createUomDto);
+
+    return await this.uomRepository.save(newUom);
   }
 
-  findAll() {
-    return `This action returns all uom`;
+  async findAll() {
+    return await this.uomRepository.find({});
+  }
+
+  async CheckIfUomExistsById(id: number) {
+    return await this.uomRepository.exist({ where: { id } });
   }
 
   async findOne(id: number) {
@@ -40,7 +46,12 @@ export class UomService {
     return updatedUom;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} uom`;
+  async remove(id: number) {
+    const deleteUom = await this.CheckIfUomExistsById(id);
+    if (!deleteUom) {
+      throw new NotFoundException('UOM not found');
+    }
+    await this.uomRepository.delete(id);
+    return deleteUom;
   }
 }

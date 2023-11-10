@@ -12,6 +12,7 @@ import { UomService } from '../uom/uom.service';
 import { UOM } from 'src/entities/uom.entity';
 import { UpdateUOMDto } from '../uom/dto/update-uom.dto';
 import { UpdateAddonDto } from '../addon/dto/update-addon.dto';
+import { CreateUOMDto } from '../uom/dto/create-uom.dto';
 
 @Injectable()
 export class ProductService {
@@ -229,12 +230,34 @@ export class ProductService {
     return updatedProduct;
   }
 
+  async addUomToProduct(productId: number, uom: CreateUOMDto) {
+    const product = await this.findOne(productId);
+    const newUom: UOM = await this.uomService.create(uom);
+
+    product.uoms.push(newUom);
+    await this.productRepository.save(product);
+    return product;
+  }
+
+  async removeUomFromProduct(productId: number, uomId: number) {
+    const product = await this.findOne(productId);
+    const uom = product.uoms.find((uom) => {
+      return uom.id == uomId;
+    });
+
+    if (!uom) {
+      throw new NotFoundException(`UOM with ID ${uomId} not found at product`);
+    }
+
+    await this.uomService.remove(uomId);
+    return product;
+  }
+
   async remove(id: number) {
     const DeletedProduct = await this.findOne(id);
     if (!DeletedProduct) {
       throw new NotFoundException('Product not found');
     }
-
     await this.productRepository.delete(id);
     return DeletedProduct;
   }
