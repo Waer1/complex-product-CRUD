@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { UomService } from './uom.service';
-import { UomController } from './uom.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UOM } from 'src/entities/uom.entity';
 
