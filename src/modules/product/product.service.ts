@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { UomService } from '../uom/uom.service';
 import { UOM } from 'src/entities/uom.entity';
 import { UpdateUOMDto } from '../uom/dto/update-uom.dto';
+import { UpdateAddonDto } from '../addon/dto/update-addon.dto';
 
 @Injectable()
 export class ProductService {
@@ -129,31 +130,37 @@ export class ProductService {
     }
   }
 
-  updateAddon(addons, productUom) {
-    addons.forEach(async (addon) => {
+  updateAddon(addons: UpdateAddonDto[], productUom) {
+    for (const addon of addons) {
       const { addonId, addonItems } = addon;
       delete addon.addonId;
       delete addon.addonItems;
       const productAddon = productUom.addons.find((a) => a.id === addonId);
 
-      addonItems.forEach(async (addonItem) => {
-        const { addonItemId } = addonItem;
+      if (addonItems) {
+        this.updateAddonItem(addonItems, productAddon);
+      }
 
-        delete addonItem.addonItemId;
-
-        const productAddonItem = productAddon.addonItems.find(
-          (ai) => ai.id === addonItemId,
-        );
-        Object.assign(productAddonItem, addonItem);
-      });
       Object.assign(productAddon, addon);
-    });
+    }
   }
 
+  updateAddonItem(addonItems, productAddon) {
+    for (const addonItem of addonItems) {
+      const { addonItemId } = addonItem;
+
+      delete addonItem.addonItemId;
+
+      const productAddonItem = productAddon.addonItems.find(
+        (ai) => ai.id === addonItemId,
+      );
+      Object.assign(productAddonItem, addonItem);
+    }
+  }
 
   UpdateProductUOMS(uoms, updatedProduct) {
     // loop over the uoms that are required to update
-    uoms.forEach(async (uom) => {
+    for (const uom of uoms) {
       // this is the uomId of the uom that we want to update
       const { uomId, addons } = uom;
 
@@ -161,8 +168,9 @@ export class ProductService {
       delete uom.uomId;
       delete uom.addons;
 
-      // this is the ProductUOM that we want to update
+      // this is the ProductUOM that we want to update it
       const productUom = updatedProduct.uoms.find((u) => u.id === uomId);
+
       // if there update for the UMOImage
       if (uom.uomImage) {
         Object.assign(productUom.uomImage, uom.uomImage);
@@ -174,12 +182,11 @@ export class ProductService {
 
       // update the addons
       if (addons) {
+        console.log('waer', typeof addons, addons);
         this.updateAddon(addons, productUom);
       }
-    });
-
+    }
   }
-
 
   async update(id: number, updateProductDto: UpdateProductDto) {
     // throw error if no data to update

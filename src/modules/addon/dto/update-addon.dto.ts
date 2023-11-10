@@ -30,11 +30,12 @@ export class UpdateAddonDto {
   name?: string;
 
   @IsArray()
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => UpdateAddonItemDto)
   @ApiProperty({
     type: [UpdateAddonItemDto],
     example: [{ name: 'AddonItem1' }, { name: 'AddonItem2' }],
   })
-  addonItems: UpdateAddonItemDto[];
+  addonItems?: UpdateAddonItemDto[];
 }

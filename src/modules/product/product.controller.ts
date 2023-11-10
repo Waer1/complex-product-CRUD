@@ -104,7 +104,7 @@ export class ProductController {
           ],
         },
       },
-      'Update UOM Addon': {
+      'Update UOM Addon Item': {
         summary: 'Update UOM Addon for one of the product UOMs',
         value: {
           uoms: [
@@ -112,20 +112,35 @@ export class ProductController {
               uomId: 1,
               addons: [
                 {
-                 addonId: 1,
+                  addonId: 1,
                   addonItems: [
                     {
                       addonItemId: 1,
                       name: 'new addon item name',
                     },
                   ],
-                }
-              ]
+                },
+              ],
             },
           ],
         },
       },
-
+      'Update UOM Addon Name': {
+        summary: 'Update UOM Addon for one of the product UOMs',
+        value: {
+          uoms: [
+            {
+              uomId: 1,
+              addons: [
+                {
+                  addonId: 1,
+                  name: 'new addon name',
+                },
+              ],
+            },
+          ],
+        },
+      },
     },
   })
   @Patch(':id')
