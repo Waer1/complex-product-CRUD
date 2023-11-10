@@ -40,7 +40,6 @@ export class ProductService {
     const foundedProduct = await this.checkIfProductExistsByName(
       createProductDto.name,
     );
-    console.log(foundedProduct);
     if (foundedProduct) {
       throw new NotFoundException('Product With That Name already exists');
     }
@@ -248,7 +247,6 @@ export class ProductService {
 
       // update the addons
       if (addons) {
-        console.log('waer', typeof addons, addons);
         this.updateAddon(addons, productUom);
       }
     }
@@ -302,7 +300,6 @@ export class ProductService {
 
     // update the first level of the product with the date
     if (updateProductDto && Object.keys(updateProductDto).length > 0) {
-      console.log('updateProductDto', updateProductDto);
       Object.assign(updatedProduct, updateProductDto);
     }
 
