@@ -11,10 +11,11 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from 'src/entities/proudct.entity';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUOMDto } from '../uom/dto/create-uom.dto';
 import { CreateAddonDto } from '../addon/dto/create-addon.dto';
 
+@ApiTags('product')
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
