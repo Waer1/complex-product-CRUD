@@ -11,7 +11,10 @@ import { Repository } from 'typeorm';
 import { UomService } from '../uom/uom.service';
 import { UOM } from 'src/entities/uom.entity';
 import { UpdateUOMDto } from '../uom/dto/update-uom.dto';
-import { UpdateAddonDto } from '../addon/dto/update-addon.dto';
+import {
+  UpdateAddonDto,
+  UpdateAddonItemDto,
+} from '../addon/dto/update-addon.dto';
 import { CreateUOMDto } from '../uom/dto/create-uom.dto';
 import { AddonService } from '../addon/AddonService';
 import { CreateAddonDto } from '../addon/dto/create-addon.dto';
@@ -91,14 +94,38 @@ export class ProductService {
     return product;
   }
 
-  async checkIfProductExistsByName(name: string) {
+  /**
+   * Checks if a product exists by its name.
+   *
+   * @param {string} name The name of the product.
+   *
+   * @return {Promise<boolean>} Whether the product exists.
+   */
+  async checkIfProductExistsByName(name: string): Promise<boolean> {
     return await this.productRepository.exist({ where: { name } });
   }
 
-  async checkIfProductExists(id: number) {
+  /**
+   * Checks if a product exists by its ID.
+   *
+   * @param {number} id The ID of the product.
+   *
+   * @return {Promise<boolean>} Whether the product exists.
+   */
+  async checkIfProductExists(id: number): Promise<boolean> {
     return await this.productRepository.exist({ where: { id } });
   }
 
+  /**
+   * Validates the updated product data.
+   *
+   * @param {Product} updatedProduct The updated product data.
+   * @param {UpdateUOMDto[]} uoms The updated UOMs of the product.
+   * @param {number} ProductID The ID of the product.
+   *
+   * This function checks if all UOMs and their addons in the updated product data exist in the original product.
+   * If a UOM or an addon does not exist, it throws a NotFoundException.
+   */
   isValidUpdateProductDto(
     updatedProduct: Product,
     uoms: UpdateUOMDto[],
@@ -109,7 +136,11 @@ export class ProductService {
     // Check if all uomId's exist
     for (const uom of uoms) {
       const { uomId } = uom;
+
+      // Find the UOM in the product's UOMs
       const foundUOM = productUoms.find((uom) => uom.id === uomId);
+
+      // If the UOM is not found, throw a NotFoundException
       if (!foundUOM) {
         throw new NotFoundException(
           `UOM With ID ${uomId} not found For Product With ID ${ProductID} `,
@@ -120,9 +151,13 @@ export class ProductService {
       if (addons) {
         for (const addon of addons) {
           const { addonId } = addon;
+
+          // Find the addon in the UOM's addons
           const foundAddon = foundUOM.addons.find(
             (addon) => addon.id === addonId,
           );
+
+          // If the addon is not found, throw a NotFoundException
           if (!foundAddon) {
             throw new NotFoundException(
               `Addon With ID ${addonId} not found For Product With ID ${ProductID} and UOM With ID ${uomId} `,
@@ -133,7 +168,16 @@ export class ProductService {
     }
   }
 
-  updateAddon(addons: UpdateAddonDto[], productUom) {
+  /**
+   * Updates the addons of a product's UOM.
+   *
+   * @param {UpdateAddonDto[]} addons The updated addons.
+   * @param {UOM} productUom The UOM of the product.
+   *
+   * This function goes through each addon in the updated addons, finds the corresponding addon in the product's UOM,
+   * and updates it with the new data. If the addon has items, it also updates them.
+   */
+  updateAddon(addons: UpdateAddonDto[], productUom: UOM) {
     for (const addon of addons) {
       const { addonId, addonItems } = addon;
       delete addon.addonId;
@@ -148,7 +192,16 @@ export class ProductService {
     }
   }
 
-  updateAddonItem(addonItems, productAddon) {
+  /**
+   * Updates the items of a product's addon.
+   *
+   * @param {UpdateAddonItemDto[]} addonItems The updated addon items.
+   * @param {Addon} productAddon The addon of the product.
+   *
+   * This function goes through each item in the updated addon items, finds the corresponding item in the product's addon,
+   * and updates it with the new data.
+   */
+  updateAddonItem(addonItems: UpdateAddonItemDto[], productAddon: Addon) {
     for (const addonItem of addonItems) {
       const { addonItemId } = addonItem;
 
@@ -161,7 +214,17 @@ export class ProductService {
     }
   }
 
-  UpdateProductUOMS(uoms, updatedProduct) {
+  /**
+   * Updates the UOMs of a product.
+   *
+   * @param {UpdateUOMDto[]} uoms The updated UOMs.
+   * @param {Product} updatedProduct The product to update.
+   *
+   * This function goes through each UOM in the updated UOMs, finds the corresponding UOM in the product,
+   * and updates it with the new data. If the UOM has an image or a barcode, it also updates them.
+   * If the UOM has addons, it updates them by calling the `updateAddon` function.
+   */
+  UpdateProductUOMS(uoms: UpdateUOMDto[], updatedProduct: Product) {
     // loop over the uoms that are required to update
     for (const uom of uoms) {
       // this is the uomId of the uom that we want to update
@@ -191,7 +254,24 @@ export class ProductService {
     }
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto) {
+  /**
+   * Updates a product.
+   *
+   * @param {number} id The ID of the product to update.
+   * @param {UpdateProductDto} updateProductDto The new data for the product.
+   *
+   * This function first checks if there is any data to update. If not, it throws a BadRequestException.
+   * Then it checks if the product exists. If not, it throws a NotFoundException.
+   * It then retrieves the product from the database and separates the UOMs from the rest of the data.
+   * If there are UOMs to update, it validates them and updates them.
+   * Finally, it updates the rest of the product data and saves the updated product to the database.
+   *
+   * @return {Promise<Product>} The updated product.
+   */
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+  ): Promise<Product> {
     // throw error if no data to update
     if (Object.keys(updateProductDto).length === 0) {
       throw new BadRequestException('No data to update');
@@ -232,7 +312,21 @@ export class ProductService {
     return updatedProduct;
   }
 
-  async addUomToProduct(productId: number, uom: CreateUOMDto) {
+  /**
+   * Adds a UOM to a product.
+   *
+   * @param {number} productId The ID of the product to add the UOM to.
+   * @param {CreateUOMDto} uom The UOM to add to the product.
+   *
+   * This function first retrieves the product from the database. Then it creates a new UOM using the provided data
+   * and adds it to the product's UOMs. Finally, it saves the updated product to the database.
+   *
+   * @return {Promise<Product>} The updated product.
+   */
+  async addUomToProduct(
+    productId: number,
+    uom: CreateUOMDto,
+  ): Promise<Product> {
     const product = await this.findOne(productId);
     const newUom: UOM = await this.uomService.create(uom);
 
@@ -241,6 +335,17 @@ export class ProductService {
     return product;
   }
 
+  /**
+   * Removes a UOM from a product.
+   *
+   * @param {number} productId The ID of the product to remove the UOM from.
+   * @param {number} uomId The ID of the UOM to remove.
+   *
+   * This function first retrieves the product from the database. Then it finds the UOM in the product's UOMs.
+   * If the UOM is not found, it throws a NotFoundException. Then it removes the UOM and returns the updated product.
+   *
+   * @return {Promise<Product>} The updated product.
+   */
   async removeUomFromProduct(productId: number, uomId: number) {
     const product = await this.findOne(productId);
     const uom = product.uoms.find((uom) => {
@@ -255,6 +360,19 @@ export class ProductService {
     return product;
   }
 
+  /**
+   * Adds an addon to a product's UOM.
+   *
+   * @param {number} productId The ID of the product to add the addon to.
+   * @param {number} uomId The ID of the UOM to add the addon to.
+   * @param {CreateAddonDto} addon The addon to add.
+   *
+   * This function first retrieves the product from the database. Then it finds the UOM in the product's UOMs.
+   * If the UOM is not found, it throws a NotFoundException. Then it creates a new addon using the provided data
+   * and adds it to the UOM's addons. Finally, it saves the updated product to the database.
+   *
+   * @return {Promise<Product>} The updated product.
+   */
   async addAddonToProduct(
     productId: number,
     uomId: number,
@@ -273,6 +391,19 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
+  /**
+   * Removes an addon from a product's UOM.
+   *
+   * @param {number} productId The ID of the product to remove the addon from.
+   * @param {number} uomId The ID of the UOM to remove the addon from.
+   * @param {number} addonId The ID of the addon to remove.
+   *
+   * This function first retrieves the product from the database. Then it finds the UOM in the product's UOMs.
+   * If the UOM is not found, it throws a NotFoundException. Then it finds the addon in the UOM's addons.
+   * If the addon is not found, it throws a NotFoundException. Then it removes the addon and returns the updated product.
+   *
+   * @return {Promise<Product>} The updated product.
+   */
   async removeAddonFromProduct(
     productId: number,
     uomId: number,
@@ -297,6 +428,16 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
+  /**
+   * Removes a product.
+   *
+   * @param {number} id The ID of the product to remove.
+   *
+   * This function first checks if the product exists. If not, it throws a NotFoundException.
+   * Then it removes the product from the database and returns the removed product.
+   *
+   * @return {Promise<Product>} The removed product.
+   */
   async remove(id: number) {
     const DeletedProduct = await this.findOne(id);
     if (!DeletedProduct) {
