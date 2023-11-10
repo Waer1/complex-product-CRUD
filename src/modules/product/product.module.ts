@@ -9,6 +9,7 @@ import { UOMImage } from 'src/entities/uomImage.entity';
 import { Addon } from 'src/entities/addon.entity';
 import { AddonItem } from 'src/entities/addonItem.entity';
 import { UomModule } from '../uom/uom.module';
+import { AddonModule } from '../addon/addon.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UomModule } from '../uom/uom.module';
       Product,
     ]),
     UomModule,
+    AddonModule
   ],
   controllers: [ProductController],
   providers: [ProductService],

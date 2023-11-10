@@ -229,12 +229,9 @@ export class ProductController {
     return this.productService.removeUomFromProduct(productId, uomId);
   }
 
-  @Post(':productId/addons')
-  @ApiParam({
-    name: 'productId',
-    example: 1,
-    description: 'The ID of the product',
-  })
+  @Post(':productId/uoms/:uomId/addons')
+  @ApiParam({ name: 'productId', example: 1, description: 'The ID of the product' })
+  @ApiParam({ name: 'uomId', example: 1, description: 'The ID of the UOM' })
   @ApiBody({
     description: 'The addon to add to the product',
     type: CreateAddonDto,
@@ -255,29 +252,23 @@ export class ProductController {
   @ApiOperation({ summary: 'Add an addon to a product' })
   async addAddonToProduct(
     @Param('productId') productId: number,
+    @Param('uomId') uomId: number,
     @Body() addon: CreateAddonDto,
   ) {
-    return this.productService.addAddonToProduct(productId, addon);
+    return this.productService.addAddonToProduct(productId, uomId, addon);
   }
 
-  
-  @Delete(':productId/addons/:addonId')
-  @ApiParam({
-    name: 'productId',
-    example: 1,
-    description: 'The ID of the product',
-  })
-  @ApiParam({
-    name: 'addonId',
-    example: 1,
-    description: 'The ID of the addon to remove from the product',
-  })
+  @Delete(':productId/uoms/:uomId/addons/:addonId')
+  @ApiParam({ name: 'productId', example: 1, description: 'The ID of the product' })
+  @ApiParam({ name: 'uomId', example: 1, description: 'The ID of the UOM' })
+  @ApiParam({ name: 'addonId', example: 1, description: 'The ID of the addon to remove from the product' })
   @ApiOperation({ summary: 'Remove an addon from a product' })
   async removeAddonFromProduct(
     @Param('productId') productId: number,
+    @Param('uomId') uomId: number,
     @Param('addonId') addonId: number,
   ) {
-    return this.productService.removeAddonFromProduct(productId, addonId);
+    return this.productService.removeAddonFromProduct(productId, uomId, addonId);
   }
 
 

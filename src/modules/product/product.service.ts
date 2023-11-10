@@ -13,6 +13,9 @@ import { UOM } from 'src/entities/uom.entity';
 import { UpdateUOMDto } from '../uom/dto/update-uom.dto';
 import { UpdateAddonDto } from '../addon/dto/update-addon.dto';
 import { CreateUOMDto } from '../uom/dto/create-uom.dto';
+import { AddonService } from '../addon/addon.service';
+import { CreateAddonDto } from '../addon/dto/create-addon.dto';
+import { Addon } from 'src/entities/addon.entity';
 
 @Injectable()
 export class ProductService {
@@ -20,6 +23,7 @@ export class ProductService {
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     private readonly uomService: UomService,
+    private readonly addonService: AddonService,
   ) {}
 
   /**
@@ -251,6 +255,48 @@ export class ProductService {
 
     await this.uomService.remove(uomId);
     return product;
+  }
+
+  async addAddonToProduct(
+    productId: number,
+    uomId: number,
+    addon: CreateAddonDto,
+  ) {
+    const product = await this.findOne(productId);
+
+    const uom = product.uoms.find((uom) => uom.id == uomId);
+    if (!uom) {
+      throw new NotFoundException(`UOM with ID ${uomId} not found at product`);
+    }
+
+    const newAddon = await this.addonService.create(addon);
+
+    uom.addons.push(newAddon);
+    return this.productRepository.save(product);
+  }
+
+  async removeAddonFromProduct(
+    productId: number,
+    uomId: number,
+    addonId: number,
+  ) {
+    const product = await this.findOne(productId);
+
+    const uom = product.uoms.find((uom) => uom.id == uomId);
+
+    if (!uom) {
+      throw new NotFoundException(`UOM with ID ${uomId} not found at product`);
+    }
+
+    const addon = uom.addons.find((addon) => addon.id == addonId);
+    if (!addon) {
+      throw new NotFoundException(`Addon with ID ${addonId} not found in UOM`);
+    }
+
+    uom.addons = uom.addons.filter((addon) => addon.id != addonId);
+
+    this.addonService.remove(addonId);
+    return this.productRepository.save(product);
   }
 
   async remove(id: number) {

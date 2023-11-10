@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { CreateAddonDto } from 'src/modules/addon/dto/create-addon.dto';
 
 
@@ -36,6 +36,7 @@ export class CreateUOMDto {
   uomImage: CreateUOMImageDto;
 
   @IsArray()
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CreateAddonDto)
   @ApiProperty({
@@ -47,5 +48,5 @@ export class CreateUOMDto {
       },
     ],
   })
-  addons: CreateAddonDto[];
+  addons?: CreateAddonDto[];
 }

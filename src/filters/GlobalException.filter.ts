@@ -1,4 +1,4 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger, NotFoundException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError, EntityNotFoundError, CannotCreateEntityIdMapError } from 'typeorm';
 
@@ -32,7 +32,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
                 message = (exception as CannotCreateEntityIdMapError).message;
                 code = (exception as any).code;
                 break;
-                
+            case NotFoundException:
+                    status = HttpStatus.NOT_FOUND;
+                    message = (exception as NotFoundException).message;
+                    break;
+
+
             default:
                 status = HttpStatus.INTERNAL_SERVER_ERROR
         }
