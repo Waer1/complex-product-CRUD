@@ -343,7 +343,7 @@ export class ProductService {
    *
    * @return {Promise<Product>} The updated product.
    */
-  async removeUomFromProduct(productId: number, uomId: number) {
+  async removeUomFromProduct(productId: number, uomId: number): Promise<Product> {
     const product = await this.findOne(productId);
     const uom = product.uoms.find((uom) => {
       return uom.id == uomId;
@@ -374,7 +374,7 @@ export class ProductService {
     productId: number,
     uomId: number,
     addon: CreateAddonDto,
-  ) {
+  ): Promise<Product> {
     const product = await this.findOne(productId);
 
     const uom = product.uoms.find((uom) => uom.id == uomId);
@@ -385,7 +385,7 @@ export class ProductService {
     const newAddon = await this.addonService.create(addon);
 
     uom.addons.push(newAddon);
-    return this.productRepository.save(product);
+    return await this.productRepository.save(product);
   }
 
   /**
@@ -405,7 +405,7 @@ export class ProductService {
     productId: number,
     uomId: number,
     addonId: number,
-  ) {
+  ): Promise<Product> {
     const product = await this.findOne(productId);
 
     const uom = product.uoms.find((uom) => uom.id == uomId);
@@ -422,7 +422,7 @@ export class ProductService {
     uom.addons = uom.addons.filter((addon) => addon.id != addonId);
 
     this.addonService.remove(addonId);
-    return this.productRepository.save(product);
+    return await this.productRepository.save(product);
   }
 
   /**
@@ -435,7 +435,7 @@ export class ProductService {
    *
    * @return {Promise<Product>} The removed product.
    */
-  async remove(id: number) {
+  async remove(id: number): Promise<Product> {
     const DeletedProduct = await this.findOne(id);
     if (!DeletedProduct) {
       throw new NotFoundException('Product not found');
