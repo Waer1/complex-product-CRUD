@@ -13,7 +13,7 @@ import { UOM } from 'src/entities/uom.entity';
 import { UpdateUOMDto } from '../uom/dto/update-uom.dto';
 import { UpdateAddonDto } from '../addon/dto/update-addon.dto';
 import { CreateUOMDto } from '../uom/dto/create-uom.dto';
-import { AddonService } from '../addon/addon.service';
+import { AddonService } from '../addon/AddonService';
 import { CreateAddonDto } from '../addon/dto/create-addon.dto';
 import { Addon } from 'src/entities/addon.entity';
 
@@ -64,8 +64,6 @@ export class ProductService {
       },
     });
   }
-
-  // relations: ['uoms', 'uoms.barcode', 'uoms.image', 'uoms.addons', 'uoms.addons.addonItems'],
 
   /**
    * Retrieves a product by its ID along with its associated UOMs, Barcodes, Images, Addons, and Addon Items.

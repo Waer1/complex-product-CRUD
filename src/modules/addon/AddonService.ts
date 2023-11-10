@@ -51,7 +51,7 @@ export class AddonService {
    *
    * @return {Promise<Addon>} The addon.
    */
-  async findOne(id: number): Promise<Addon> {
+  async findOne(id: number) {
     const addon = await this.addonRepository.findOne({ where: { id } });
     if (!addon) {
       throw new NotFoundException('Addon not found');
@@ -59,15 +59,7 @@ export class AddonService {
     return addon;
   }
 
-  /**
-   * Updates an addon by its ID.
-   *
-   * @param {number} id The ID of the addon.
-   * @param {UpdateAddonDto} updateAddonDto The data to update the addon with.
-   *
-   * @return {Promise<Addon>} The updated addon.
-   */
-  async update(id: number, updateAddonDto: UpdateAddonDto): Promise<Addon> {
+  async update(id: number, updateAddonDto: UpdateAddonDto) {
     const updatedAddon = await this.findOne(id);
 
     if (!updatedAddon) {
@@ -80,15 +72,8 @@ export class AddonService {
     return updatedAddon;
   }
 
-  /**
-   * Removes an addon by its ID.
-   *
-   * @param {number} id The ID of the addon.
-   *
-   * @return {Promise<Addon>} The removed addon.
-   */
-  async remove(id: number): Promise<Addon> {
-    const deleteAddon = await this.findOne(id);
+  async remove(id: number) {
+    const deleteAddon = await this.CheckIfAddonExistsById(id);
     if (!deleteAddon) {
       throw new NotFoundException('Addon not found');
     }
