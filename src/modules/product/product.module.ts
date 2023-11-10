@@ -15,6 +15,11 @@ import { AddonModule } from '../addon/addon.module';
   imports: [
     TypeOrmModule.forFeature([
       Product,
+      UOM,
+      UOMBarcode,
+      UOMImage,
+      Addon,
+      AddonItem
     ]),
     UomModule,
     AddonModule
